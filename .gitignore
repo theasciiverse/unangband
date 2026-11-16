@@ -12,3 +12,8 @@ lib/save/
 *.res
 .settings/
 
+
+# Asciiverse
+/stage/
+/unangband
+src/unangband
