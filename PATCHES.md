@@ -55,8 +55,8 @@ log.
 - `asciiverse/README.md`: the README in each archive.
 - `asciiverse/record-preview.py` and `asciiverse/unangband.cast`: the
   catalog preview, a scripted Dwarf Warrior who travels from Hobbiton to
-  Farmer Maggot's farm and climbs down into its cellars (best of several
-  takes).
+  Farmer Maggot's farm, explores it and climbs down into its cellars
+  (best of several takes).
 - `asciiverse/unangband.toml`, `asciiverse/unangband.md`: the catalog
   manifest and store page, as drafts for hub.
 - `.github/workflows/asciiverse-release.yml`: builds the Linux and macOS

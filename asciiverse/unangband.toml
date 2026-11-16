@@ -42,11 +42,13 @@ color = "basic"
 mouse = false
 
 # 100x30, asciiverse/record-preview.py: a Dwarf Warrior called Gimrin made
-# at the birth screens, Hobbiton, the road to Farmer Maggot's farm and
-# down into the farm cellars (best of five takes)
+# at the birth screens, Hobbiton, the road to Farmer Maggot's farm, a rock
+# lizard and an insect swarm, Mr Maggot's note, and down into the farm
+# cellars (best of five takes); the still is the farm with Farmer Maggot
+# beside the cellar door, at 33 s
 [media]
 cast = "asciiverse/unangband.cast"
-thumbnail_at = 30.0
+thumbnail_at = 33.0
 
 [release]
 source = "github"
