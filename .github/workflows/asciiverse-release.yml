@@ -53,7 +53,8 @@ jobs:
       - name: Smoke test
         run: |
           # the program must find lib/ beside itself and make its state folder
-          (cd /tmp && script -qec "TERM=xterm HOME=/tmp/h timeout 5 $PWD/stage/unangband" /dev/null </dev/null || true) >smoke.log
+          here=$PWD  # before the cd: inside it $PWD is /tmp
+          (cd /tmp && script -qec "TERM=xterm HOME=/tmp/h timeout 5 $here/stage/unangband" /dev/null </dev/null || true) >smoke.log
           grep -aq "Unnamed Angband" smoke.log || { tail -c 2000 smoke.log; exit 1; }
           ls /tmp/h/.local/state/unangband
 
