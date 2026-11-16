@@ -706,6 +706,7 @@ extern void display_region(region_type *r_ptr);
 /* init2.c */
 extern void init_file_paths(char *path);
 extern void create_user_dirs(void);
+extern void user_state_path(char *buf, size_t max);
 extern void init_angband(void);
 extern void cleanup_angband(void);
 void ang_atexit(void (*arg)(void));

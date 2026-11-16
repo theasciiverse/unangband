@@ -21,6 +21,15 @@
 
 #include "main.h"
 
+#if defined(SET_UID) || defined(PRIVATE_USER_PATH)
+#include <limits.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#ifdef __APPLE__
+#include <mach-o/dyld.h>
+#endif
+#endif
+
 
 /*
  * List of the available modules in the order they are tried.
@@ -151,6 +160,43 @@ extern unsigned _ovrbuffer = 0x1500;
  * to leave enough space for the path separator, directory, and
  * filenames.
  */
+#if defined(SET_UID) || defined(PRIVATE_USER_PATH)
+/*
+ * Asciiverse: find a lib folder beside the running program and put its
+ * path, ending in a separator, in buf.  The program is found through
+ * /proc/self/exe on Linux and _NSGetExecutablePath() on macOS, so a
+ * symbolic link to it (av's ~/.local/bin link) still leads to the real
+ * folder.  Leaves buf alone when there is none.
+ */
+static void lib_beside_program(char *buf, size_t len)
+{
+	char exe[PATH_MAX];
+	char real[PATH_MAX];
+	char probe[PATH_MAX + 32];
+	struct stat st;
+	char *slash;
+
+#ifdef __APPLE__
+	uint32_t size = sizeof(exe);
+
+	if (_NSGetExecutablePath(exe, &size) != 0) return;
+#else
+	ssize_t n = readlink("/proc/self/exe", exe, sizeof(exe) - 1);
+
+	if (n <= 0) return;
+	exe[n] = '\0';
+#endif
+	if (!realpath(exe, real)) return;
+	slash = strrchr(real, '/');
+	if (!slash) return;
+	*slash = '\0';
+
+	strnfmt(probe, sizeof(probe), "%s/lib/edit", real);
+	if (stat(probe, &st) != 0 || !S_ISDIR(st.st_mode)) return;
+	strnfmt(buf, len, "%s/lib/", real);
+}
+#endif
+
 static void init_stuff(void)
 {
 	char path[1024];
@@ -173,6 +219,15 @@ static void init_stuff(void)
 
 	/* Use the angband_path, or a default */
 	my_strcpy(path, tail ? tail : DEFAULT_PATH, sizeof(path));
+
+#if defined(SET_UID) || defined(PRIVATE_USER_PATH)
+	/*
+	 * Asciiverse: without ANGBAND_PATH, read the game data from the lib
+	 * folder beside the running program when there is one, as in an av
+	 * install or an unpacked archive, whatever the current folder is.
+	 */
+	if (!tail) lib_beside_program(path, sizeof(path));
+#endif
 
 	/* Make sure it's terminated */
 	path[511] = '\0';

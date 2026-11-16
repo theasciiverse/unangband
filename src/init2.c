@@ -159,11 +159,9 @@ void init_file_paths(char *path)
 	ANGBAND_DIR_PREF = string_make(path);
 
 #ifdef PRIVATE_USER_PATH
-	/* Use absolute path -- ~/ doesn't work reliably on OS X */
-	path_parse(dirpath, sizeof(dirpath), PRIVATE_USER_PATH);
-
-    /* Build the path to the user specific sub-directory */
-	path_build(buf, sizeof(buf), dirpath, VERSION_NAME);
+	/* Asciiverse: the player's folder is in the state folder */
+	(void)dirpath;
+	user_state_path(buf, sizeof(buf));
 
     /* Build a relative path name */
     ANGBAND_DIR_USER = string_make(buf);
@@ -276,23 +274,55 @@ void init_file_paths(char *path)
  * ToDo: Add error handling.
  * ToDo: Only create the directories when actually writing files.
  */
+/*
+ * Asciiverse: the player's own folder (options, character dumps, and
+ * below it scores, bone, data and save) is $XDG_STATE_HOME/unangband,
+ * else ~/.local/state/unangband, instead of ~/.angband/Unangband.
+ */
+void user_state_path(char *buf, size_t max)
+{
+	cptr xdg = getenv("XDG_STATE_HOME");
+	cptr home = getenv("HOME");
+	char base[1024];
+
+	if (xdg && xdg[0] == '/')
+		my_strcpy(base, xdg, sizeof(base));
+	else if (home && home[0] == '/')
+		path_build(base, sizeof(base), home, ".local/state");
+	else
+		path_parse(base, sizeof(base), "~/.local/state");
+
+	path_build(buf, max, base, "unangband");
+}
+
+
+/*
+ * Create every missing folder on the way to path, as "mkdir -p" does.
+ */
+static void make_dirs(char *path)
+{
+	char *p;
+
+	for (p = path + 1; *p; p++)
+	{
+		if (*p != '/') continue;
+		*p = '\0';
+		mkdir(path, 0700);
+		*p = '/';
+	}
+	mkdir(path, 0700);
+}
+
+
 void create_user_dirs(void)
 {
 	char dirpath[1024];
 	char subdirpath[1024];
 
 
-	/* Get an absolute path from the filename */
-	path_parse(dirpath, sizeof(dirpath), PRIVATE_USER_PATH);
-
-	/* Create the ~/.angband/ directory */
-	mkdir(dirpath, 0700);
-
-	/* Build the path to the variant-specific sub-directory */
-	path_build(subdirpath, sizeof(subdirpath), dirpath, VERSION_NAME);
-
-	/* Create the directory */
-	mkdir(subdirpath, 0700);
+	/* Asciiverse: the state folder and the parents it needs */
+	user_state_path(subdirpath, sizeof(subdirpath));
+	make_dirs(subdirpath);
 
 #ifdef PRIVATE_USER_PATHS
 	/* Build the path to the scores sub-directory */
