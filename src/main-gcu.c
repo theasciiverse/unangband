@@ -159,7 +159,7 @@ static int can_fix_color = FALSE;
 /*
  * Simple Angband to Curses color conversion table
  */
-static int colortable[BASIC_COLORS];
+static int colortable[MAX_COLORS];
 
 /* Screen info: use one big Term 0, or other subwindows? */
 static bool use_big_screen;
